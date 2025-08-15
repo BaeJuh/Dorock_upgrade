@@ -5,6 +5,7 @@ export class DetailItem {
   private firstimage: string;
   private mapx: number;
   private mapy: number;
+  private recommendation: string;
 
   constructor(builder: InstanceType<typeof DetailItem.Builder>) {
     this.addr1 = builder.addr1;
@@ -13,6 +14,7 @@ export class DetailItem {
     this.firstimage = builder.firstimage;
     this.mapx = builder.mapx;
     this.mapy = builder.mapy;
+    this.recommendation = builder.recommendation;
   }
 
   static Builder = class {
@@ -22,6 +24,7 @@ export class DetailItem {
     public firstimage: string;
     public mapx: number;
     public mapy: number;
+    public recommendation: string;
 
     public setAddr1(addr1: string): this {
       this.addr1 = addr1;
@@ -50,6 +53,11 @@ export class DetailItem {
 
     public setMapy(mapy: number): this {
       this.mapy = mapy;
+      return this;
+    }
+
+    public setRecommendation(recommendation: string): this {
+      this.recommendation = recommendation;
       return this;
     }
 

@@ -52,7 +52,8 @@ export class AppService {
           .setTitle(spot.title)
           .setZipcode(spot.zipcode)
           .build();
-      });
+      })
+      .sort(() => Math.random() - 0.5);
 
     const areacodeList = (await this.areacodeRepository.find()).map(
       (areacode) => {
@@ -77,9 +78,21 @@ export class AppService {
     if (!detailInfo)
       throw new NotFoundException(`Tourist spot with id ${id} not found`);
 
-    // console.log(detailInfo);
+    // ai 자리
 
-    // gpt 자리
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GOOGLE_GENAI_API_KEY,
+    });
+
+    const prompt = `요청사항:
+                1. 관광지 : ${detailInfo.title} 주소 : ${detailInfo.addr1}에 대한 여행지 정보를 알려줘
+                2. 반환 해줄때 ** **을 이용한 강조를 빼줘.
+                3. 3줄안으로 설명해줘`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
+    });
 
     return new DetailItem.Builder()
       .setAddr1(detailInfo.addr1)
@@ -88,19 +101,27 @@ export class AppService {
       .setFirstimage(detailInfo.firstimage)
       .setMapx(detailInfo.mapx)
       .setMapy(detailInfo.mapy)
+      .setRecommendation(response.text || '')
       .build();
   }
 
-  async test(): Promise<any> {
+  async getTripInfoDetailChatBot(
+    title: string,
+    question: string,
+  ): Promise<string> {
     const ai = new GoogleGenAI({
-      apiKey: '',
+      apiKey: process.env.GOOGLE_GENAI_API_KEY,
     });
+
+    const prompt = `요청사항:
+                    ${question}이 ${title}와 거리가 멀면 응답을 "${title}에 대해 물어봐주세요."로만 응답해줘
+                    주어가 없다면 강원도의 ${title + question}에 관련된 내용을 강조 없이 반환해주면 돼.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: '잘 작동되고 있니? ',
+      model: 'gemini-2.5-flash-lite',
+      contents: prompt,
     });
 
-    return response;
+    return response.text || 'No response from AI';
   }
 }

@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 // Model
 import { DetailRequest } from 'src/model/DetailRequest';
+import { ChatBotRequest } from 'src/model/ChatBotRequest';
 
 @Controller()
 export class AppController {
@@ -20,12 +21,9 @@ export class AppController {
   async getTripInfoDetail(@Body() body: DetailRequest) {
     return this.appService.getTripInfoDetail(body.id);
   }
-  // @Post("/tripInfoDetail") // chatbot
-  // @Post("/aiPlanner")
-
-  @Get('/test')
-  async test() {
-    // chatbot
-    return this.appService.test();
+  @Post('/tripInfoDetail') // chatbot
+  async getTripInfoDetailChatBot(@Body() body: ChatBotRequest) {
+    return this.appService.getTripInfoDetailChatBot(body.title, body.question);
   }
+  // @Post("/aiPlanner")
 }

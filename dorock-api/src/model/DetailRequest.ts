@@ -1,3 +1,3 @@
 export class DetailRequest {
-  id: number;
+  public id: number;
 }

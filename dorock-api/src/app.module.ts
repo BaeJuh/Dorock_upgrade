@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Areacode } from './entity/Areacode';
 import { TouristSpot } from './entity/TouristSpot';
 import { NonBlankTouristSpot } from './entity/NonBlankTouristSpot';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { NonBlankTouristSpot } from './entity/NonBlankTouristSpot';
       synchronize: false,
     }),
     TypeOrmModule.forFeature([Areacode, TouristSpot, NonBlankTouristSpot]),
+    ConfigModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

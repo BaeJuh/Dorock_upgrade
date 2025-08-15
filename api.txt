@@ -1,0 +1,3 @@
+http://apis.data.go.kr/B551011/KorService2/areaCode2?serviceKey=McSZCW7LYX8dGwLtln2CN8hlWwnQkFQbibX470nlV797KxeZzTTWZdZ5%2Bsrqy%2FIDP8MDn%2BJHLxLcbsNQSKr6SQ%3D%3D&areaCode=32&numOfRows=20&pageNo=1&MobileOS=ETC&MobileApp=AppTest&_type=json
+
+http://apis.data.go.kr/B551011/KorService2/areaBasedList2?serviceKey=McSZCW7LYX8dGwLtln2CN8hlWwnQkFQbibX470nlV797KxeZzTTWZdZ5%2Bsrqy%2FIDP8MDn%2BJHLxLcbsNQSKr6SQ%3D%3D&pageNo=1&_type=json&numOfRows=6000&MobileApp=AppTest&MobileOS=ETC&arrange=A&areaCode=32

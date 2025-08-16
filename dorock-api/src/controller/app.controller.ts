@@ -3,6 +3,7 @@ import { AppService } from '../service/app.service';
 // Model
 import { DetailRequest } from 'src/model/DetailRequest';
 import { ChatBotRequest } from 'src/model/ChatBotRequest';
+import { AIPlannerRequest } from 'src/model/AIplannerRequest';
 
 @Controller()
 export class AppController {
@@ -22,8 +23,11 @@ export class AppController {
     return this.appService.getTripInfoDetail(body.id);
   }
   @Post('/tripInfoDetail') // chatbot
-  async getTripInfoDetailChatBot(@Body() body: ChatBotRequest) {
-    return this.appService.getTripInfoDetailChatBot(body.title, body.question);
+  async postTripInfoDetailChatBot(@Body() body: ChatBotRequest) {
+    return this.appService.postTripInfoDetailChatBot(body.title, body.question);
   }
-  // @Post("/aiPlanner")
+  @Post('/aiPlanner')
+  async getAIPlanner(@Body() body: AIPlannerRequest) {
+    return this.appService.getAIPlanner(body);
+  }
 }

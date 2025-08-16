@@ -105,6 +105,8 @@ function Alprompt() {
             // AIplanner(extractedData);
             const division = (dataTextChecked) ? " 🏷️ " : "";
             const message = userInputValue + division + dataTextChecked;
+            console.log(extractedData);
+            console.log(message);
             navigate("/aiplanner", { state: { data: extractedData, message: message } });
         } else {
             console.log("일치하는 데이터가 없습니다.");

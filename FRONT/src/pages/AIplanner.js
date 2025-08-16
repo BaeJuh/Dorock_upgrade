@@ -48,6 +48,7 @@ const AIplanner = () => {
             }
             return response.json();
         }).then(responseData => {
+            console.log(responseData)
             // console.log('서버 응답', responseData);
             setResponseData(responseData["places"]); // 관광지 정보
             // 2024.11.08 START 마커 평균값 설정을 위한 코드 추가 
@@ -124,7 +125,7 @@ const AIplanner = () => {
                                         responseData.map(
                                             (v) => {
                                                 return (<article key={v.contentid} className={styles.locationCard} onClick={ ()=>{
-                                                    navigate( "/detail", {state: {title : v.title}} )
+                                                    navigate( "/detail", {state: {id : v.id}} )
                                                 } }>
                                                     <img src={v.firstimage === "" ? alterImage : v.firstimage} alt={v.title} className={styles.locationImage} />
                                                     <div className={styles.locationInfo}>
@@ -263,7 +264,7 @@ const AIplanner = () => {
                                     responseData.map(
                                         (v) => {
                                             return (<article key={v.contentid} className={mobileStyles.locationCard} onClick={ ()=>{
-                                                navigate( "/detail", {state: {title : v.title}} )
+                                                navigate( "/detail", {state: {id : v.id}} )
                                             } }>
                                                 <img src={v.firstimage === "" ? alterImage : v.firstimage} alt={v.title} className={mobileStyles.locationImage} />
                                                 <div className={mobileStyles.locationInfo}>

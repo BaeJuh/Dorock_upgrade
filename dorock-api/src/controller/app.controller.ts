@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from '../service/app.service';
 // Model
-import { DetailRequest } from 'src/model/DetailRequest';
-import { ChatBotRequest } from 'src/model/ChatBotRequest';
-import { AIPlannerRequest } from 'src/model/AIplannerRequest';
+import { DetailRequest } from 'src/model/request/DetailRequest';
+import { ChatBotRequest } from 'src/model/request/ChatBotRequest';
+import { AIPlannerRequest } from 'src/model/request/AIplannerRequest';
 
 @Controller()
 export class AppController {

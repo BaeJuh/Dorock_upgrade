@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { GoogleGenAI } from '@google/genai';
@@ -10,11 +10,13 @@ import { AreaCodeItem } from '../model/AreaCodeItem';
 import { TouristSpotItem } from '../model/TouristSpotItem';
 import { TripInfoResponse } from 'src/model/TripInfoResponse';
 import { DetailItem } from 'src/model/DetailItem';
-import { AIPlannerRequest } from 'src/model/AIplannerRequest';
+import { AIPlannerRequest } from 'src/model/request/AIplannerRequest';
 import { AIPlannerItem } from 'src/model/AIPlannerItem';
 // Interface
 import { AIResponseObj } from 'src/interface/AIResponseObj';
-import { NonBlankTouristSpot } from 'src/entity/NonBlankTouristSpot';
+// Exception
+import { CMissingDataException } from 'src/exception/CMissingDataException';
+import { CNoResponseAIException } from 'src/exception/CNoResponseAIException';
 
 @Injectable()
 export class AppService {
@@ -24,8 +26,6 @@ export class AppService {
     private readonly areacodeRepository: Repository<Areacode>,
     @InjectRepository(TouristSpot)
     private readonly touristSpotRepository: Repository<TouristSpot>,
-    @InjectRepository(NonBlankTouristSpot)
-    private readonly nonBlankTouristSpotRepository: Repository<NonBlankTouristSpot>,
   ) {
     this.ai = new GoogleGenAI({
       apiKey: process.env.GOOGLE_GENAI_API_KEY,
@@ -67,6 +67,9 @@ export class AppService {
       })
       .sort(() => Math.random() - 0.5);
 
+    if (!touristSpot)
+      throw new CMissingDataException('Tourist spot list is missing');
+
     const areacodeList = (await this.areacodeRepository.find()).map(
       (areacode) => {
         return new AreaCodeItem.Builder()
@@ -76,6 +79,9 @@ export class AppService {
           .build();
       },
     );
+
+    if (!areacodeList)
+      throw new CMissingDataException('Area code list is missing');
 
     return new TripInfoResponse()
       .setTouristSpot(touristSpot)
@@ -88,7 +94,7 @@ export class AppService {
     });
 
     if (!detailInfo)
-      throw new NotFoundException(`Tourist spot with id ${id} not found`);
+      throw new CMissingDataException('Tourist spot detail is missing');
 
     const prompt = `요청사항:
                 1. 관광지 : ${detailInfo.title} 주소 : ${detailInfo.addr1}에 대한 여행지 정보를 알려줘
@@ -99,6 +105,8 @@ export class AppService {
       model: 'gemini-2.5-flash-lite',
       contents: prompt,
     });
+
+    if (!response) throw new CNoResponseAIException('No response from AI');
 
     return new DetailItem.Builder()
       .setAddr1(detailInfo.addr1)
@@ -117,14 +125,14 @@ export class AppService {
   ): Promise<string> {
     const prompt = `요청사항:
                     ${question}이 ${title}와 거리가 멀면 응답을 "${title}에 대해 물어봐주세요."로만 응답해줘
-                    주어가 없다면 강원도의 ${title + question}에 관련된 내용을 강조 없이 반환해주면 돼.`;
+                    주어가 없다면 강원도의 ${title + question}에 관련된 내용을 강조 없이 평문으로만 반환해주면 돼.`;
 
     const response = await this.ai.models.generateContent({
       model: 'gemini-2.5-flash-lite',
       contents: prompt,
     });
 
-    if (!response) throw new Error('No response from AI');
+    if (!response) throw new CNoResponseAIException('No response from AI');
 
     return response.text || 'No response from AI';
   }
@@ -176,7 +184,7 @@ export class AppService {
       contents: prompt,
     });
 
-    if (!response) throw new Error('No response from AI');
+    if (!response) throw new CNoResponseAIException('No response from AI');
 
     // console.log(JSON.parse(response.text || '{}'));
 
@@ -210,7 +218,7 @@ export class AppService {
       }
     }
 
-    console.log(places);
+    // console.log(places);
 
     let categoryQuery = '';
     if (categoryOptions.length > 0) {
@@ -234,6 +242,9 @@ export class AppService {
 
     const touristSpots: TouristSpot[] =
       await this.touristSpotRepository.query(sql);
+
+    if (!touristSpots)
+      throw new CMissingDataException('Tourist spot list is missing');
 
     const touristSpotItems: TouristSpotItem[] = touristSpots.map((spot) => {
       return new TouristSpotItem.Builder()

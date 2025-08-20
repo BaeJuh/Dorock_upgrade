@@ -182,14 +182,57 @@ export class AppService {
     const response = await this.ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
+      // config: {
+      //   responseMimeType: 'application/json',
+      //   responseSchema: {
+      //     type: Type.OBJECT,
+      //     properties: {
+      //       result: {
+      //         type: Type.OBJECT,
+      //         properties: {
+      //           recommendation: { type: Type.STRING },
+      //         },
+      //         additionalProperties: {
+      //           type: Type.OBJECT,
+      //           properties: {
+      //             places: {
+      //               type: Type.ARRAY,
+      //               items: { type: Type.STRING },
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
     });
 
     if (!response) throw new CNoResponseAIException('No response from AI');
 
     // console.log(JSON.parse(response.text || '{}'));
+    console.log(response.text);
 
-    const aiResponseObj = JSON.parse(response.text || '{}') as AIResponseObj;
-    const gptComment = aiResponseObj.result['recommendation'];
+    let aiResponseObj = {} as AIResponseObj;
+
+    try {
+      aiResponseObj = JSON.parse(response.text || '{}') as AIResponseObj;
+    } catch (err) {
+      console.warn('gemini response error : ' + err);
+
+      const matchObj = response.text?.match(/```(json)?\s*([\s\S]*?)```/);
+
+      if (matchObj) {
+        aiResponseObj = JSON.parse(matchObj[2]) as AIResponseObj;
+      } else {
+        aiResponseObj = {} as AIResponseObj;
+      }
+    }
+
+    // const aiResponseObj = JSON.parse(response.text || '{}') as AIResponseObj;
+
+    const gptComment =
+      aiResponseObj.result['recommendation'] ||
+      '죄송합니다. AI가 제대로 응답하지 않았습니다.';
 
     const categoryObj: Record<string, string> = {
       A01: '자연',
@@ -201,24 +244,34 @@ export class AppService {
     let places: string[] = [];
     const categoryOptions: string[] = [];
 
-    if (Object.keys(aiResponseObj.result).length === 2) {
-      for (const key of Object.keys(aiResponseObj.result)) {
-        if (key !== 'recommendation') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          places = [...places, ...aiResponseObj.result[key]['places']];
-        }
+    // if (Object.keys(aiResponseObj.result).length === 2) {
+    //   for (const key of Object.keys(aiResponseObj.result)) {
+    //     if (key !== 'recommendation') {
+    //       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    //       places = [...places, ...aiResponseObj.result[key]['places']];
+    //     }
+    //   }
+    // } else {
+    //   for (const key of Object.keys(aiResponseObj.result)) {
+    //     if (categoryObj[key]) {
+    //       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    //       places = [...places, ...aiResponseObj.result[key]['places']];
+    //       categoryOptions.push(key);
+    //     }
+    //   }
+    // }
+
+    for (const key of Object.keys(aiResponseObj.result)) {
+      if (key !== 'recommendation') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        places = [...places, ...aiResponseObj.result[key]['places']];
       }
-    } else {
-      for (const key of Object.keys(aiResponseObj.result)) {
-        if (categoryObj[key]) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          places = [...places, ...aiResponseObj.result[key]['places']];
-          categoryOptions.push(key);
-        }
+      if (categoryObj[key]) {
+        categoryOptions.push(key);
       }
     }
 
-    // console.log(places);
+    console.log(places);
 
     let categoryQuery = '';
     if (categoryOptions.length > 0) {
@@ -233,11 +286,23 @@ export class AppService {
       .map((d) => `A.title ILIKE '%${d}%'`)
       .join(' OR ');
 
+    // let whereStr = `(${categoryQuery})`;
+
+    // if (queryConditionsStr) {
+    //   whereStr += ` AND (${queryConditionsStr})`;
+    // }
+
+    let whereStr = `(${queryConditionsStr})`;
+
+    if (categoryQuery) {
+      whereStr += `AND (${categoryQuery})`;
+    }
+
     const sql = `
       SELECT B.*
       FROM non_blank_tourist_spot A
       JOIN tourist_spot B ON A.contentid = B.contentid
-      WHERE (${categoryQuery}) AND (${queryConditionsStr})
+      WHERE ${whereStr}
     `.trim();
 
     const touristSpots: TouristSpot[] =

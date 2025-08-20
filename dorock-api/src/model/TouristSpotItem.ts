@@ -22,7 +22,7 @@ export class TouristSpotItem {
   private title: string;
   private zipcode: string;
 
-  constructor(builder: InstanceType<typeof TouristSpotItem.Builder>) {
+  private constructor(builder: InstanceType<typeof TouristSpotItem.Builder>) {
     this.id = builder.id;
     this.addr1 = builder.addr1;
     this.addr2 = builder.addr2;

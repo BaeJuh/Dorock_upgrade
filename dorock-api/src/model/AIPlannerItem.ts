@@ -4,7 +4,7 @@ export class AIPlannerItem {
   private places: TouristSpotItem[];
   private recommendation: string;
 
-  constructor(builder: InstanceType<typeof AIPlannerItem.Builder>) {
+  private constructor(builder: InstanceType<typeof AIPlannerItem.Builder>) {
     this.places = builder.places;
     this.recommendation = builder.recommendation;
   }

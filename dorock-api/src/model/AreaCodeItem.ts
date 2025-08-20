@@ -3,7 +3,7 @@ export class AreaCodeItem {
   private code: string;
   private name: string;
 
-  constructor(builder: InstanceType<typeof AreaCodeItem.Builder>) {
+  private constructor(builder: InstanceType<typeof AreaCodeItem.Builder>) {
     this.rnum = builder.rnum;
     this.code = builder.code;
     this.name = builder.name;

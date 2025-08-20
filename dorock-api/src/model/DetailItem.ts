@@ -7,7 +7,7 @@ export class DetailItem {
   private mapy: number;
   private recommendation: string;
 
-  constructor(builder: InstanceType<typeof DetailItem.Builder>) {
+  private constructor(builder: InstanceType<typeof DetailItem.Builder>) {
     this.addr1 = builder.addr1;
     this.addr2 = builder.addr2;
     this.title = builder.title;
